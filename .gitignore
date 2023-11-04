@@ -1,5 +1,5 @@
 
-.elf
-.img
-.o
+*.elf
+*.img
+*.o
 mikanos/
