@@ -194,12 +194,12 @@ EFI_STATUS EFIAPI UefiMain(
       gop->Mode->FrameBufferBase + gop->Mode->FrameBufferSize,
       gop->Mode->FrameBufferSize);
 
-  UINT8* frame_buffer = (UINT8*)gop->Mode->FrameBufferBase;
-  for(UINTN i=0; i<gop->Mode->FrameBufferSize; i++){
-    frame_buffer[i]=0xFF;
-  }
+  // UINT8* frame_buffer = (UINT8*)gop->Mode->FrameBufferBase;
+  // for(UINTN i=0; i<gop->Mode->FrameBufferSize; i++){
+  //   frame_buffer[i]=0xFF;
+  // }
   // #@@range_end(gop)
-
+  
   // #@range_begin(read_kernel)
   EFI_FILE_PROTOCOL* kernel_file;
   root_dir->Open(root_dir, &kernel_file, L"\\kernel.elf", EFI_FILE_MODE_READ, 0);
@@ -244,9 +244,9 @@ EFI_STATUS EFIAPI UefiMain(
   // #@range_begin(call_kernel)
   UINT64 entry_addr = *(UINT64*)(kernel_base_addr + 24);
 
-  typedef void EntryPointType(void);
+  typedef void EntryPointType(UINT64, UINT64);
   EntryPointType* entry_point = (EntryPointType*)entry_addr;
-  entry_point();
+  entry_point(gop->Mode->FrameBufferBase, gop->Mode->FrameBufferSize);
   // #@range_end(call_kernel)
 
   //Print(L"All done\n");
