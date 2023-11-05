@@ -20,6 +20,10 @@ struct MemoryMap {
 };
 // #@@range_end(struct_memory_map)
 
+void Halt(void){
+  while(1) __asm__("hlt");
+}
+
 // #@@range_begin(get_memory_map)
 EFI_STATUS GetMemoryMap(struct MemoryMap* map) {
   if (map->buffer == NULL) {
@@ -215,17 +219,20 @@ EFI_STATUS EFIAPI UefiMain(
   UINTN kernel_file_size = file_info->FileSize;
 
   EFI_PHYSICAL_ADDRESS kernel_base_addr = 0x100000;
-  gBS->AllocatePages(
+  EFI_STATUS status = gBS->AllocatePages(
     AllocateAddress, EfiLoaderData,
     (kernel_file_size + 0xfff) / 0x1000, &kernel_base_addr
   );
+  if(EFI_ERROR(status)){
+    Print(L"failed to allocate page: %r", status);
+    Halt();
+  }
   kernel_file->Read(kernel_file, &kernel_file_size, (VOID*)kernel_base_addr);
   Print(L"Kernel; 0x%-lx (%lu bytes)\n", kernel_base_addr, kernel_file_size);
   // #@range_end(read_kernel)
 
 
   // #@range_begin(exit_bs)
-  EFI_STATUS status;
   status = gBS->ExitBootServices(image_handle, memmap.map_key);
   if(EFI_ERROR(status)){
     status = GetMemoryMap(&memmap);
