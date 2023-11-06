@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <cstddef>
 #include "frame_buffer_config.hpp"
 #include "graphics.hpp"
@@ -33,6 +34,13 @@ extern "C" void KernelMain(const struct FrameBufferConfig& frame_buffer_config) 
       pixel_writer->Write(100+x, 100+y, {0, 255, 0});
     }
   }
+
+
+  WriteStrings(*pixel_writer, 0, 0, "Hello, World!", {0,0,255});
+
+  char buf[128];
+  sprintf(buf, "1+2 = %d", 1+2);
+  WriteStrings(*pixel_writer, 0, 20, buf, {0,0,0});
 
   int posX=0;
   int line=0;
