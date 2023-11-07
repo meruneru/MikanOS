@@ -3,6 +3,7 @@
 #include "frame_buffer_config.hpp"
 #include "graphics.hpp"
 #include "font.hpp"
+#include "console.hpp"
 
 void* operator new(size_t size, void* buf){
   return buf;
@@ -29,28 +30,15 @@ extern "C" void KernelMain(const struct FrameBufferConfig& frame_buffer_config) 
     }
   }
 
-  for(int x=0; x<200; x++){
-    for(int y=0; y<100; y++){
-      pixel_writer->Write(100+x, 100+y, {0, 255, 0});
-    }
-  }
+  Console console{*pixel_writer, {0, 0,0}, {255, 255, 255}};
 
-
-  WriteStrings(*pixel_writer, 0, 0, "Hello, World!", {0,0,255});
 
   char buf[128];
-  sprintf(buf, "1+2 = %d", 1+2);
-  WriteStrings(*pixel_writer, 0, 20, buf, {0,0,0});
-
-  int posX=0;
-  int line=0;
-  for(unsigned char c=0x01; c<=0x7E;c++, posX++){
-      if(posX%20==0){
-        line++;
-        posX=0;
-      }
-      WriteAscii(*pixel_writer, 50+8*posX, 50+line*20, c, {0,0,0});
+  for (int i = 0; i < 27; i++)
+  {
+    sprintf(buf, "line %d\n", i);
+    console.PutString(buf);
   }
-
+  
   while(1) __asm__("hlt");
 }
