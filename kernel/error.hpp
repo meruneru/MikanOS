@@ -8,10 +8,33 @@ class Error {
     kSuccess,
     kFull,
     kEmpty,
-    kLastOfCode,
+   kNoEnoughMemory,
+    kIndexOutOfRange,
+    kHostControllerNotHalted,
+    kInvalidSlotID,
+    kPortNotConnected,
+    kInvalidEndpointNumber,
+    kTransferRingNotSet,
+    kAlreadyAllocated,
+    kNotImplemented,
+    kInvalidDescriptor,
+    kBufferTooSmall,
+    kUnknownDevice,
+    kNoCorrespondingSetupStage,
+    kTransferFailed,
+    kInvalidPhase,
+    kUnknownXHCISpeedID,
+    kNoWaiter,
+    kLastOfCode,  // この列挙子は常に最後に配置する
   };
 
   Error(Code code) : code_{code} {}
+
+  Error(Code code, const char* file, int line) : code_{code}, line_{line}, file_{file} {}
+
+  Code Cause() const {
+    return this->code_;
+  }
 
   operator bool() const {
     return this->code_ != kSuccess;
@@ -21,12 +44,48 @@ class Error {
     return code_names_[static_cast<int>(this->code_)];
   }
 
+  const char* File() const {
+    return this->file_;
+  }
+
+  int Line() const {
+    return this->line_;
+  }
+
  private:
-  static constexpr std::array<const char*, 3> code_names_ = {
+  static constexpr std::array code_names_{
     "kSuccess",
     "kFull",
     "kEmpty",
+    "kNoEnoughMemory",
+    "kIndexOutOfRange",
+    "kHostControllerNotHalted",
+    "kInvalidSlotID",
+    "kPortNotConnected",
+    "kInvalidEndpointNumber",
+    "kTransferRingNotSet",
+    "kAlreadyAllocated",
+    "kNotImplemented",
+    "kInvalidDescriptor",
+    "kBufferTooSmall",
+    "kUnknownDevice",
+    "kNoCorrespondingSetupStage",
+    "kTransferFailed",
+    "kInvalidPhase",
+    "kUnknownXHCISpeedID",
+    "kNoWaiter",
   };
+  static_assert(Error::Code::kLastOfCode == code_names_.size());
 
   Code code_;
+  int line_;
+  const char* file_;
 };
+
+template<class T>
+struct WithError{
+  T value;
+  Error error;
+};
+
+#define MAKE_ERROR(code) Error((code), __FILE__, __LINE__)
